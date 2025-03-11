@@ -52,12 +52,12 @@ const AddExpenseScreen = ({ route, navigation }) => {
       billImage || '',
       date.toISOString().split('T')[0], // Format date as YYYY-MM-DD
       () => {
-        Alert.alert('Success', 'Expense added!');
-        navigation.goBack(); // Go back to HomeScreen after adding expense
+        Alert.alert('Success', 'Expense added!', [{ text: "OK", onPress: () => navigation.navigate('HomeScreen', { username }) }]);
       },
       error => Alert.alert('Error', error.message)
     );
   };
+  
 
   const onChangeDate = (event, selectedDate) => {
     setShowPicker(false); // Hide picker after selection

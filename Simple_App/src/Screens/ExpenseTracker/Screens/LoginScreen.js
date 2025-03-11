@@ -23,11 +23,11 @@ const LoginScreen = ({ navigation }) => {
       Alert.alert('Error', 'Please enter a username');
       return;
     }
-
-    checkUserExists(username, exists => {
+  
+    checkUserExists(username, async (exists) => {
       if (exists) {
         Alert.alert('Welcome Back', 'Logging you in...');
-        AsyncStorage.setItem('loggedInUser', username);
+        await AsyncStorage.setItem('loggedInUser', username);
         navigation.replace('Home', { username });
       } else {
         insertUser(
@@ -42,6 +42,7 @@ const LoginScreen = ({ navigation }) => {
       }
     });
   };
+  
 
   return (
     <View style={styles.container}>
