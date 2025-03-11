@@ -26,7 +26,8 @@ const LoginScreen = ({ navigation }) => {
 
     checkUserExists(username, async (exists) => {
       if (exists) {
-        Alert.alert('Welcome Back', 'Logging you in...');
+        Alert.alert('Success', `New account created! Welcome, ${username}!`);
+
         await AsyncStorage.setItem('loggedInUser', username);
         navigation.replace('Home', { username });
       } else {
@@ -60,7 +61,7 @@ const LoginScreen = ({ navigation }) => {
       <LinearGradient
         colors={['#1FABDF', '#CA67FA','#DD74D3','#FF9176']} // Blue → Purple → Orange
         start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
+        end={{ x: 1, y: 1 }}
         style={styles.gradientButton}
       >
           <Text style={styles.buttonText}>Login / Register</Text>

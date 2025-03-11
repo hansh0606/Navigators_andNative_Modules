@@ -53,23 +53,20 @@ const AddExpenseScreen = ({ route, navigation }) => {
       date.toISOString().split('T')[0], // Format date as YYYY-MM-DD
       () => {
         Alert.alert('Success', 'Expense added!', [
-          { text: "OK", onPress: () => navigation.navigate('Home', { username }) }
+          { text: "OK", onPress: () => navigation.navigate('Home', { newExpense: { title, category, amount, billImage, date } }) }
         ]);
       },
       (error) => {
         Alert.alert('Error', error.message);
       }
     );
-  
-  
-
+  };
   const onChangeDate = (event, selectedDate) => {
     setShowPicker(false); // Hide picker after selection
     if (selectedDate) {
       setDate(selectedDate);
     }
-  }};
-
+  }
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Title:</Text>
@@ -95,8 +92,8 @@ const AddExpenseScreen = ({ route, navigation }) => {
         />
       )}
 
-      <Button title="Capture Bill Image" onPress={handleCaptureImage} />
-      {billImage && <Image source={{ uri: billImage }} style={styles.image} />}
+      {/* <Button title="Capture Bill Image" onPress={handleCaptureImage} />
+      {billImage && <Image source={{ uri: billImage }} style={styles.image} />} */}
 
       <Button title="Add Expense" onPress={handleAddExpense} />
     </View>
