@@ -11,27 +11,33 @@ import BottomTabNavigator from './src/Screens/BottomTabNavigator/BottomTabNaviga
 import TopTabNavigator from './src/Screens/TopTabNavigator/TopTabNavigator';
 import CameraButton from './src/Screens/CameraButton/CameraButton';
 import Axios from './src/Screens/Axios/Axios';
-
+import WeatherApp from './src/Screens/WeatherApp/WeatherApp';
+import AsyncStorage from './src/Screens/AsyncStorage/AsyncStorageApp';
+import UserPreferences from './src/Screens/AsyncStorage/ThemeWithAsyncStorage';
+import SQLiteDemo from './src/Screens/SQLite/SQLiteDemo';
+import ExpenseApp from './src/Screens/ExpenseTracker/Screens/ExpenseApp';
 
 export default function App() {
   return (
+    <View style={{flex: 1, backgroundColor: '#fff'}}>
+      <ExpenseApp/>
+      {/* <To_do_App/> */}
+      {/* <TodoList/> */}
+      {/* <StackNavigator /> */}
+      {/* <CameraButton/> */}
+      {/* <Axios/> */}
+      {/* <WeatherApp/> */}
+      {/* <AsyncStorage/> */}
+      {/* <UserPreferences/> */}
+      {/* <SQLiteDemo/> */}
+      {/* <NativeStackNavigator/> */}
+      {/* <BottomTabNavigator/> */}
+      {/* <TopTabNavigator/> */}
+      {/* <Counter_App/>  */}
 
-      <View style={{flex: 1, backgroundColor: '#fff'}}>
-
-        {/* <To_do_App/> */}
-        {/* <TodoList/> */}
-        {/* <StackNavigator /> */}
-        {/* <CameraButton/> */}
-        <Axios/>
-        {/* <NativeStackNavigator/> */}
-        {/* <BottomTabNavigator/> */}
-        {/* <TopTabNavigator/> */}
-        {/* <Counter_App/> 
-
-        <ScrollView >
+      {/* <ScrollView >
         <Advance_Hands_On_Exercise />
         </ScrollView> */}
-      </View>
- 
+    </View>
   );
 }
