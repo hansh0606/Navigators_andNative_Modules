@@ -52,11 +52,15 @@ const AddExpenseScreen = ({ route, navigation }) => {
       billImage || '',
       date.toISOString().split('T')[0], // Format date as YYYY-MM-DD
       () => {
-        Alert.alert('Success', 'Expense added!', [{ text: "OK", onPress: () => navigation.navigate('HomeScreen', { username }) }]);
+        Alert.alert('Success', 'Expense added!', [
+          { text: "OK", onPress: () => navigation.navigate('Home', { username }) }
+        ]);
       },
-      error => Alert.alert('Error', error.message)
+      (error) => {
+        Alert.alert('Error', error.message);
+      }
     );
-  };
+  
   
 
   const onChangeDate = (event, selectedDate) => {
@@ -64,7 +68,7 @@ const AddExpenseScreen = ({ route, navigation }) => {
     if (selectedDate) {
       setDate(selectedDate);
     }
-  };
+  }};
 
   return (
     <View style={styles.container}>
