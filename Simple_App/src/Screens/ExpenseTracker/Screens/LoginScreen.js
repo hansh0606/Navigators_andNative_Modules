@@ -26,7 +26,7 @@ const LoginScreen = ({ navigation }) => {
 
     checkUserExists(username, async (exists) => {
       if (exists) {
-        Alert.alert('Success', `New account created! Welcome, ${username}!`);
+        Alert.alert('Success', `Welcome, ${username}!`);
 
         await AsyncStorage.setItem('loggedInUser', username);
         navigation.replace('Home', { username });

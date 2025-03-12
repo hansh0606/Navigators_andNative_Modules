@@ -84,22 +84,31 @@ export const createExpensesTable = () => {
 
 // Insert Expense into Database (FIXED)
 export const insertExpense = (username, title, category, amount, billImage, date, onSuccess, onError) => {
+  console.log('insertExpense called with data:', { username, title, category, amount, billImage, date });
   console.log('Inserting Expense:', { username, title, category, amount, billImage, date });
 
   db.transaction(tx => {
-    tx.executeSql(
-      `INSERT INTO expenses (username, title, category, amount, billImage, date) VALUES (?, ?, ?, ?, ?, ?);`,
-      [username, title, category, parseFloat(amount), billImage || '', date],
-      (_, result) => {
-        console.log('Insert Success:', result);
-        if (onSuccess) onSuccess(result);
-      },
-      (_, error) => {
-        console.error('Insert Error:', error.message || JSON.stringify(error));
-        if (onError) onError(error);
-      }
-    );
+      tx.executeSql(
+          `INSERT INTO expenses (username, title, category, amount, billImage, date) VALUES (?, ?, ?, ?, ?, ?);`,
+          [username, title, category, parseFloat(amount), billImage || '', date],
+          (_, result) => {
+              console.log('Insert Success:', result);
+              console.log('Insert Id is:', result.insertId);
+              if (onSuccess) onSuccess(result);
+              console.log("insertExpense onSuccess callback finished");
+          },
+          (_, error) => {
+              console.error('Insert Error:', error); // Log the entire error object
+              console.error('Insert Error message:', error?.message); //Log the error message if it exists.
+              console.error('Insert Error tx:', tx); //log the transaction object.
+              if (onError) onError(error);
+              console.log("insertExpense onError callback finished");
+          }
+      );
+  }, (error) => {
+      console.error('Transaction Error:', error);
   });
+  console.log("insertExpense function finished");
 };
 
 // Retrieve Expenses for a Specific User
@@ -138,16 +147,28 @@ export const fetchExpenses = (username, successCallback, errorCallback) => {
     tx.executeSql(
       `SELECT * FROM expenses WHERE username = ? ORDER BY date DESC;`,
       [username],
-      (_, { rows }) => successCallback(rows.length ? rows._array : []),
+      (_, results) => {
+        let expenses = [];
+        for (let i = 0; i < results.rows.length; i++) {
+          expenses.push(results.rows.item(i)); // ✅ Correct way to access rows
+        }
+        successCallback(expenses);
+      },
       (_, error) => errorCallback(error)
     );
   });
 };
 
+
 // Initialize Tables
 export const initializeDatabase = () => {
-  createUserTable();
-  createExpensesTable();
+  console.log("initializeDatabase called");
+    enableForeignKeys();
+    console.log("enableForeignKeys finished");
+    createUserTable();
+    console.log("createUserTable finished");
+    createExpensesTable();
+    console.log("createExpensesTable finished");
 };
 
 // Log Expenses Data for Debugging

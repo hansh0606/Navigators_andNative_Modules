@@ -7,9 +7,9 @@ import {
   FlatList,
   Button,
   StyleSheet,
-  Touchable,
   TouchableOpacity,
   Image,
+  Alert,
 } from 'react-native';
 import {getExpenses} from './database';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,17 +17,42 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const HomeScreen = ({route, navigation}) => {
   const {username} = route.params;
   const [expenses, setExpenses] = useState([]);
+  const [totalAmount, setTotalAmount] = useState(0);
 
-  const fetchExpenses = () => {
+  // Function to fetch expenses from database
+  const fetchExpenses = useCallback(() => {
+    console.log('Fetching expenses for user:', username);
     getExpenses(username, data => {
+      console.log('Fetched expenses:', data);
       setExpenses(data);
+      
+      // Calculate total amount
+      const total = data.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
+      setTotalAmount(total);
     });
-  };
+  }, [username]);
 
+  // Use Effect for initial load and debugging
+  useEffect(() => {
+    console.log("HomeScreen mounted for user:", username);
+    fetchExpenses();
+  }, [fetchExpenses]);
+
+  // useFocusEffect to refresh data when screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      fetchExpenses();
-    }, []),
+      console.log("Screen focused, checking for newExpense");
+      // Check if new expense was passed through navigation
+      if (route.params?.newExpense) {
+        console.log("New expense detected:", route.params.newExpense);
+        // Refresh the expenses list from the database
+        fetchExpenses();
+      }
+      return () => {
+        // Optional cleanup function
+        console.log("Screen blurred");
+      };
+    }, [route.params?.newExpense, fetchExpenses])
   );
 
   const handleLogout = async () => {
@@ -39,6 +64,7 @@ const HomeScreen = ({route, navigation}) => {
       });
     } catch (error) {
       console.error('Logout Error:', error);
+      Alert.alert('Error', 'Failed to logout');
     }
   };
 
@@ -80,7 +106,7 @@ const HomeScreen = ({route, navigation}) => {
         end={{x: 1, y: 1}}
         style={styles.balanceCard}>
         <Text style={styles.balanceText}>Total Balance</Text>
-        <Text style={styles.totalBalanceText}>₹ 0000</Text>
+        <Text style={styles.totalBalanceText}>₹ {totalAmount.toFixed(2)}</Text>
       </LinearGradient>
 
       <Text
@@ -91,7 +117,7 @@ const HomeScreen = ({route, navigation}) => {
           marginTop: 20,
           marginBottom: 10,
         }}>
-        Total Balance
+        Recent Expenses
       </Text>
       {expenses.length === 0 ? (
         <Text>No expenses found. Add your first expense!</Text>
@@ -101,15 +127,16 @@ const HomeScreen = ({route, navigation}) => {
           keyExtractor={item => item.id.toString()}
           renderItem={({item}) => (
             <View style={styles.expenseItem}>
-              {/* Category at Left-Center */}
+              {/* Category and Title at Left */}
               <View style={styles.leftContainer}>
+                <Text style={styles.expenseTitle}>{item.title}</Text>
                 <Text style={styles.expenseCategory}>{item.category}</Text>
               </View>
 
               {/* Amount at Right-Top & Date at Right-Bottom */}
               <View style={styles.rightContainer}>
-                <Text style={styles.expenseAmount}>{`₹${item.amount}`}</Text>
-                <Text style={styles.expenseDate}>01/01/25{item.date}</Text>
+                <Text style={styles.expenseAmount}>{`₹${parseFloat(item.amount).toFixed(2)}`}</Text>
+                <Text style={styles.expenseDate}>{item.date}</Text>
               </View>
             </View>
           )}
@@ -196,6 +223,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'white',
   },
+  expenseTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333', 
+  },
   expenseAmount: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -220,7 +252,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', // Align them properly
   },
   expenseText: {fontSize: 16, fontWeight: 'bold'},
-  expenseCategory: {fontSize: 16, fontWeight: 'bold', color: '#333'},
+  expenseCategory: {fontSize: 14, color: '#666'},
   logoutButton: {marginTop: 20},
 
   leftContainer: {
@@ -250,7 +282,6 @@ const styles = StyleSheet.create({
     fontSize: 40,
     color: '#fff',
     fontWeight: 'bold',
-    
   },
 });
 
