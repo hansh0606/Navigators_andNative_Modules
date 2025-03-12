@@ -19,7 +19,7 @@ const App = () => {
         <Stack.Screen 
           name="AddExpenseScreen" 
           component={AddExpenseScreen} 
-          options={{ headerShown: true }} // Show header only for AddExpenseScreen
+          options={{ headerShown: false }} // Show header only for AddExpenseScreen
         />
       </Stack.Navigator>
     </NavigationContainer>
