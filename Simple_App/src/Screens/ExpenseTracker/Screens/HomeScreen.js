@@ -9,8 +9,9 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  ScrollView
 } from 'react-native';
-import {getExpenses} from './database';
+import {getExpenses,deleteExpense} from './database';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {BarChart} from 'react-native-chart-kit';
 import {Dimensions} from 'react-native';
@@ -87,6 +88,36 @@ const HomeScreen = ({route, navigation}) => {
     }
   };
 
+  const handleDelete = async id => {
+    Alert.alert(
+      'Delete Expense',
+      'Are you sure you want to delete this expense?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: () => {
+            deleteExpense(
+              id,
+              () => {
+                fetchExpenses(); // Refresh expenses after deletion
+                Alert.alert('Success', 'Expense deleted successfully');
+              },
+              error => {
+                console.error('Delete Error:', error);
+                Alert.alert('Error', 'Failed to delete expense');
+              },
+            );
+          },
+        },
+      ],
+      {cancelable: false},
+    );
+  };
+
   const chartConfig = {
     backgroundGradientFrom: '#fff',
     backgroundGradientTo: '#fff',
@@ -112,6 +143,30 @@ const HomeScreen = ({route, navigation}) => {
       },
     ],
   };
+
+  const renderExpenseItems = () => {
+    if (expenses.length === 0) {
+      return <Text>No expenses found. Add your first expense!</Text>;
+    }
+
+    return expenses.map(item => (
+      <View key={item.id.toString()} style={styles.expenseItem}>
+        <View style={styles.leftContainer}>
+          <Text style={styles.expenseTitle}>{item.title}</Text>
+          <Text style={styles.expenseCategory}>{item.category}</Text>
+        </View>
+        <View style={styles.rightContainer}>
+          <TouchableOpacity onPress={() => handleDelete(item.id)}>
+            <Text style={{color: 'red'}}>Delete</Text>
+          </TouchableOpacity>
+          <Text style={styles.expenseAmount}>{`₹${parseFloat(
+            item.amount,
+          ).toFixed(2)}`}</Text>
+          <Text style={styles.expenseDate}>{item.date}</Text>
+        </View>
+      </View>
+    ));
+  };
 
   return (
     <View style={styles.container}>
@@ -148,55 +203,34 @@ const HomeScreen = ({route, navigation}) => {
         <Text style={styles.totalBalanceText}>₹ {totalAmount.toFixed(2)}</Text>
       </LinearGradient>
 
-      <View style={styles.chartCard}>
-        <View style={styles.titleContainer}>
-          {' '}
-          {/* Add a container for title and total */}
-          <Text style={styles.chartTitle}>
-            {dailyLabels.length > 0
-              ? `${dailyLabels[0]} Jan ${new Date().getFullYear()} - ${
-                  dailyLabels[dailyLabels.length - 1]
-                } Jan ${new Date().getFullYear()}`
-              : 'Daily Expenses'}
-          </Text>
-          <Text style={styles.chartTotal}>
-            ₹ {dailyExpensesData.reduce((a, b) => a + b, 0).toFixed(2)}
-          </Text>
-        </View>
-
-        <BarChart
-          data={chartData}
-          width={Dimensions.get('window').width - 60} // Adjusted width
-          height={200}
-          yAxisLabel="₹"
-          chartConfig={chartConfig}
-          verticalLabelRotation={0}
-        />
-      </View>
-
-      <Text style={styles.recentExpensesTitle}>Recent Expenses</Text>
-      {expenses.length === 0 ? (
-        <Text>No expenses found. Add your first expense!</Text>
-      ) : (
-        <FlatList
-          data={expenses}
-          keyExtractor={item => item.id.toString()}
-          renderItem={({item}) => (
-            <View style={styles.expenseItem}>
-              <View style={styles.leftContainer}>
-                <Text style={styles.expenseTitle}>{item.title}</Text>
-                <Text style={styles.expenseCategory}>{item.category}</Text>
-              </View>
-              <View style={styles.rightContainer}>
-                <Text style={styles.expenseAmount}>{`₹${parseFloat(
-                  item.amount,
-                ).toFixed(2)}`}</Text>
-                <Text style={styles.expenseDate}>{item.date}</Text>
-              </View>
+      <ScrollView>
+          <View style={styles.chartCard}>
+            <View style={styles.titleContainer}>
+              <Text style={styles.chartTitle}>
+                {dailyLabels.length > 0
+                  ? `${dailyLabels[0]} Jan ${new Date().getFullYear()} - ${
+                      dailyLabels[dailyLabels.length - 1]
+                    } Jan ${new Date().getFullYear()}`
+                  : 'Daily Expenses'}
+              </Text>
+              <Text style={styles.chartTotal}>
+                ₹ {dailyExpensesData.reduce((a, b) => a + b, 0).toFixed(2)}
+              </Text>
             </View>
-          )}
-        />
-      )}
+
+            <BarChart
+              data={chartData}
+              width={Dimensions.get('window').width - 60}
+              height={200}
+              yAxisLabel="₹"
+              chartConfig={chartConfig}
+              verticalLabelRotation={0}
+            />
+          </View>
+
+          <Text style={styles.recentExpensesTitle}>Recent Expenses</Text>
+          <View style={styles.expensesContainer}>{renderExpenseItems()}</View>
+        </ScrollView>
 
       <View style={styles.AddExpensecontainer}>
         <TouchableOpacity
