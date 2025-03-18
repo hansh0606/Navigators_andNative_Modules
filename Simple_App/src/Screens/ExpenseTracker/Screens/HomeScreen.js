@@ -9,9 +9,9 @@ import {
   TouchableOpacity,
   Image,
   Alert,
-  ScrollView
+  ScrollView,
 } from 'react-native';
-import {getExpenses,deleteExpense} from './database';
+import {getExpenses, deleteExpense} from './database';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {BarChart} from 'react-native-chart-kit';
 import {Dimensions} from 'react-native';
@@ -115,8 +115,8 @@ const HomeScreen = ({route, navigation}) => {
         },
       ],
       {cancelable: false},
-    );
-  };
+    );
+  };
 
   const chartConfig = {
     backgroundGradientFrom: '#fff',
@@ -125,16 +125,17 @@ const HomeScreen = ({route, navigation}) => {
     strokeWidth: 2,
     barPercentage: 0.3,
     barRadius: 5,
-    barRadiusTop: 5,
     decimalPlaces: 2,
     propsForBackgroundLines: {
       strokeWidth: 0, // Remove dotted lines
     },
     padding: 10,
+    fillShadowGradientFrom: '#1FABDF',
+    fillShadowGradientFromOpacity: 1,
+    fillShadowGradientTo: '#CA67FA',
+    fillShadowGradientToOpacity: 0.7,
   };
 
- 
-  
   const chartData = {
     labels: dailyLabels,
     datasets: [
@@ -144,66 +145,120 @@ const HomeScreen = ({route, navigation}) => {
     ],
   };
 
+  const categoryIcons = {
+    food: require('../assets/Images/food1.png'),
+    travel: require('../assets/Images/travel.png'),
+    healthcare: require('../assets/Images/healthcare1.png'),
+    shopping: require('../assets/Images/shopping.png'),
+    entertainment: require('../assets/Images/tickets.png'),
+  };
+
+  const getCategoryIcon = category => categoryIcons[category] || null;
+
+  const categoryColors = {
+    food: ['#E49B0F', '#FCF55F'], // Gradient colors for food
+    travel: ['#25BFA0', '#6FDED0'], // Gradient colors for travel
+    healthcare: ['#0047AB', '#AB62E3'], // Gradient colors for healthcare
+    shopping: ['#803AE9', '#EE82EE'], // Gradient colors for shopping
+    entertainment: ['#EE4547', '#FFE4B5'], // Gradient colors for entertainment
+  };
+
   const renderExpenseItems = () => {
     if (expenses.length === 0) {
-      return <Text>No expenses found. Add your first expense!</Text>;
+      return (
+        <View>
+          <Text>No expenses found. Add your first expense!</Text>
+        </View>
+      );
     }
 
-    return expenses.map(item => (
-      <View key={item.id.toString()} style={styles.expenseItem}>
-        <View style={styles.leftContainer}>
-          <Text style={styles.expenseTitle}>{item.title}</Text>
-          <Text style={styles.expenseCategory}>{item.category}</Text>
-        </View>
-        <View style={styles.rightContainer}>
-          <TouchableOpacity onPress={() => handleDelete(item.id)}>
-            <Text style={{color: 'red'}}>Delete</Text>
-          </TouchableOpacity>
-          <Text style={styles.expenseAmount}>{`₹${parseFloat(
-            item.amount,
-          ).toFixed(2)}`}</Text>
-          <Text style={styles.expenseDate}>{item.date}</Text>
-        </View>
-      </View>
-    ));
-  };
-
-  return (
-    <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <View style={styles.userContainer}>
-          <LinearGradient
-            colors={['#1FABDF', '#CA67FA', '#FF9176']}
-            start={{x: 0, y: 0}}
-            end={{x: 1, y: 1}}
-            style={styles.gradientCircle}>
-            <View style={styles.userImageWrapper}>
-              <Image
-                style={styles.userImage}
-                source={require('../assets/Images/userImage.jpeg')}
-              />
+    return expenses.map(item => {
+      console.log('Expense Category:', item.category); // Debugging
+      console.log('Image Source:', getCategoryIcon(item.category)); // Debugging
+      return (
+        <View key={item.id.toString()} style={styles.expenseItem}>
+          <View style={styles.leftContainer}>
+            <View
+              style={[
+                styles.iconBackground,
+                {backgroundColor: categoryColors[item.category]},
+              ]}>
+              <LinearGradient
+                colors={categoryColors[item.category]} // Get gradient colors from palette
+                style={styles.iconBackground}
+                start={{x: 0.5, y: 1}} // Bottom center
+                end={{x: 0.5, y: 0}} // Top center
+              >
+                <Image
+                  source={getCategoryIcon(item.category)}
+                  style={[styles.categoryIcon, {tintColor: 'white'}]} // Apply tintColor
+                />
+              </LinearGradient>
             </View>
-          </LinearGradient>
-          <Text style={styles.headerText}>{username}</Text>
+            <View style={styles.textContainer}>
+              <Text style={styles.expenseTitle}>{item.title}</Text>
+              <Text style={styles.expenseCategory}>{item.category}</Text>
+            </View>
+          </View>
+          <View style={styles.rightContainer}>
+            <LinearGradient
+              colors={['#1FABDF', '#CA67FA', '#FF9176']}
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 1}}
+              style={styles.gradientSquare}>
+              <TouchableOpacity onPress={() => handleDelete(item.id)}>
+                <Text style={{color: 'white', fontWeight: 'bold'}}>Delete</Text>
+              </TouchableOpacity>
+            </LinearGradient>
+
+            <Text style={styles.expenseAmount}>{`₹${parseFloat(
+              item.amount,
+            ).toFixed(2)}`}</Text>
+            <Text style={styles.expenseDate}>{item.date}</Text>
+          </View>
         </View>
-        <TouchableOpacity onPress={handleLogout}>
-          <Image
-            style={styles.logoutImage}
-            source={require('../assets/Images/logout-icon.png')}
-          />
-        </TouchableOpacity>
-      </View>
+      );
+    });
+  };
+  return (
+    <>
+      <View style={styles.container}>
+        <View style={styles.headerContainer}>
+          <View style={styles.userContainer}>
+            <LinearGradient
+              colors={['#1FABDF', '#CA67FA', '#FF9176']}
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 1}}
+              style={styles.gradientCircle}>
+              <View style={styles.userImageWrapper}>
+                <Image
+                  style={styles.userImage}
+                  source={require('../assets/Images/userImage.jpeg')}
+                />
+              </View>
+            </LinearGradient>
+            <Text style={styles.headerText}>{username}</Text>
+          </View>
+          <TouchableOpacity onPress={handleLogout}>
+            <Image
+              style={styles.logoutImage}
+              source={require('../assets/Images/logout-icon.png')}
+            />
+          </TouchableOpacity>
+        </View>
 
-      <LinearGradient
-        colors={['#1FABDF', '#CA67FA', '#DD74D3', '#FF9176']}
-        start={{x: 0, y: 0}}
-        end={{x: 1, y: 1}}
-        style={styles.balanceCard}>
-        <Text style={styles.balanceText}>Total Expense</Text>
-        <Text style={styles.totalBalanceText}>₹ {totalAmount.toFixed(2)}</Text>
-      </LinearGradient>
+        <LinearGradient
+          colors={['#1FABDF', '#CA67FA', '#DD74D3', '#FF9176']}
+          start={{x: 0, y: 0}}
+          end={{x: 1, y: 1}}
+          style={styles.balanceCard}>
+          <Text style={styles.balanceText}>Total Expense</Text>
+          <Text style={styles.totalBalanceText}>
+            ₹ {totalAmount.toFixed(2)}
+          </Text>
+        </LinearGradient>
 
-      <ScrollView>
+        <ScrollView style={{marginTop: 10,marginBottom:40}}>
           <View style={styles.chartCard}>
             <View style={styles.titleContainer}>
               <Text style={styles.chartTitle}>
@@ -227,30 +282,50 @@ const HomeScreen = ({route, navigation}) => {
               verticalLabelRotation={0}
             />
           </View>
-
           <Text style={styles.recentExpensesTitle}>Recent Expenses</Text>
           <View style={styles.expensesContainer}>{renderExpenseItems()}</View>
-        </ScrollView>
+      
+        </ScrollView>
+      </View>
 
       <View style={styles.AddExpensecontainer}>
+    <View style={styles.buttonContainer}>
         <TouchableOpacity
-          style={styles.addButtonContainer}
-          onPress={() => navigation.navigate('AddExpenseScreen', {username})}>
-          <LinearGradient
-            colors={['#FF9176', '#DD74D3', '#CA67FA', '#1FABDF']}
-            locations={[0.2, 0.5, 0.6, 0.9]}
-            end={{x: 1, y: 1}}
-            style={styles.addButton}>
-            <Text style={styles.plusText}>+</Text>
-          </LinearGradient>
+            onPress={() => navigation.navigate('AddExpenseScreen', {username})}>
+            <LinearGradient
+                colors={['#FF9176', '#DD74D3', '#CA67FA', '#1FABDF']}
+                locations={[0.2, 0.5, 0.6, 0.9]}
+                end={{ x: 1, y: 1 }}
+                style={styles.addButton}>
+                <Text style={styles.plusText}>+</Text>
+            </LinearGradient>
         </TouchableOpacity>
-      </View>
     </View>
+</View>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
   container: {flex: 1, padding: 20, backgroundColor: '#F3F5F7'},
+  iconBackground: {
+    width: 40, // Adjust as needed
+    height: 40, // Adjust as needed
+    borderRadius: 20, // Make it circular
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  categoryIcon: {
+    width: 25, // Adjust as needed
+    height: 25, // Adjust as needed
+
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  textContainer: {
+    flexDirection: 'column',
+  },
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -263,6 +338,15 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 3,
+  },
+
+  gradientSquare: {
+    width: 60,
+    height: 30,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 3,
@@ -326,19 +410,32 @@ const styles = StyleSheet.create({
   },
   AddExpensecontainer: {
     position: 'absolute',
-    bottom: 30,
+    bottom: 0, // Adjust bottom position
+    width: '100%',
+    backgroundColor: 'white',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    elevation: 4,
+    paddingTop: 50 // Adjust paddingTop to accommodate half-button
+    
+  },
+
+  buttonContainer: {
+    position: 'absolute',
+    top: -45, // Negative top margin to push the button up
     alignSelf: 'center',
-  },
-  addButtonContainer: {
-    width: 70,
-    height: 70,
-  },
+    borderWidth:10,
+    borderColor:'white',
+    borderRadius:60,
+ 
+},
   addButton: {
     width: 70,
     height: 70,
     borderRadius: 40,
     alignItems: 'center',
     justifyContent: 'center',
+    alignSelf: 'center',
   },
   plusText: {
     fontSize: 40,
