@@ -20,6 +20,7 @@ import ExpenseApp from './src/Screens/ExpenseTracker/Screens/ExpenseApp';
 export default function App() {
   return (
     <View style={{flex: 1, backgroundColor: '#fff'}}>
+      <Text>Let's check</Text>
       <ExpenseApp/>
       {/* <To_do_App/> */}
       {/* <TodoList/> */}
